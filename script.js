@@ -1675,30 +1675,30 @@ function showPayPalQR() {
 	updateFooterStatus("PayPal donation option shown", false);
 }
 
-// Show Card payment (Razorpay/Stripe)
-function showCardQR() {
-	// Option 1: UPI QR for card payments (via payment gateway)
-	// Option 2: Link to Razorpay payment page
-	const paymentLink = "https://rzp.io/l/yourpaymentlink"; // CHANGE THIS
+// // Show Card payment (Razorpay/Stripe)
+// function showCardQR() {
+// 	// Option 1: UPI QR for card payments (via payment gateway)
+// 	// Option 2: Link to Razorpay payment page
+// 	const paymentLink = "https://rzp.io/l/yourpaymentlink"; // CHANGE THIS
 
-	const container = document.getElementById("qrContainer");
+// 	const container = document.getElementById("qrContainer");
 
-	container.innerHTML = `
-        <div style="text-align: center;">
-            <div class="qr-placeholder" style="color: #333;">
-                <p>💳 Secure card payments</p>
-                <a href="${paymentLink}" target="_blank" class="donation-btn" style="background: #2ecc71; color: white; display: inline-block; margin: 10px 0;">
-                    Pay with Card
-                </a>
-                <div class="donation-address" onclick="copyToClipboard('${paymentLink}')">
-                    📋 Copy payment link
-                </div>
-                <p style="font-size: 11px; margin-top: 15px;">🔒 Secure payment via Razorpay</p>
-            </div>
-        </div>
-    `;
-	updateFooterStatus("Card payment option shown", false);
-}
+// 	container.innerHTML = `
+//         <div style="text-align: center;">
+//             <div class="qr-placeholder" style="color: #333;">
+//                 <p>💳 Secure card payments</p>
+//                 <a href="${paymentLink}" target="_blank" class="donation-btn" style="background: #2ecc71; color: white; display: inline-block; margin: 10px 0;">
+//                     Pay with Card
+//                 </a>
+//                 <div class="donation-address" onclick="copyToClipboard('${paymentLink}')">
+//                     📋 Copy payment link
+//                 </div>
+//                 <p style="font-size: 11px; margin-top: 15px;">🔒 Secure payment via Razorpay</p>
+//             </div>
+//         </div>
+//     `;
+// 	updateFooterStatus("Card payment option shown", false);
+// }
 
 // Copy to clipboard helper
 function copyToClipboard(text) {
@@ -1725,11 +1725,11 @@ function copyToClipboard(text) {
 function initDonationButtons() {
 	const upiBtn = document.getElementById("showUPIBtn");
 	const paypalBtn = document.getElementById("showPayPalBtn");
-	const cardBtn = document.getElementById("showCardBtn");
+	//const cardBtn = document.getElementById("showCardBtn");
 
 	if (upiBtn) upiBtn.addEventListener("click", showUPIQR);
 	if (paypalBtn) paypalBtn.addEventListener("click", showPayPalQR);
-	if (cardBtn) cardBtn.addEventListener("click", showCardQR);
+	//if (cardBtn) cardBtn.addEventListener("click", showCardQR);
 }
 
 // Call this in DOMContentLoaded

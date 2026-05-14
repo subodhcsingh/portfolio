@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Portfolio Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📊 Stock Portfolio Manager</h1>
+
+        <!-- Transaction Form -->
+        <div class="card">
+            <h2>➕ Add Transaction</h2>
+            <div class="form-row">
+                <input type="text" id="symbol" placeholder="Symbol (e.g., AAPL)" required>
+                <select id="type">
+                    <option value="buy">Buy</option>
+                    <option value="sell">Sell</option>
+                </select>
+                <input type="number" id="shares" placeholder="Shares" step="0.01" required>
+                <input type="number" id="price" placeholder="Price per share" step="0.01" required>
+                <input type="date" id="date">
+                <button id="addTransactionBtn">Add Transaction</button>
+            </div>
+        </div>
+
+        <!-- Price Update Form -->
+        <!-- <div class="card">
+            <h2>💰 Update Current Prices</h2>
+            <div class="form-row">
+                <input type="text" id="priceSymbol" placeholder="Symbol (e.g., AAPL)">
+                <input type="number" id="newPrice" placeholder="Current Price" step="0.01">
+                <button id="updatePriceBtn">Update Price</button>
+            </div>
+        </div> -->
+        <!-- Price Update Form -->
+        <div class="card">
+            <h2>💰 Update Current Prices</h2>
+            <div class="form-row">
+                <input type="text" id="priceSymbol" placeholder="Symbol (e.g., RELIANCE.NS)" style="flex:1">
+                <input type="number" id="newPrice" placeholder="Manual Price" step="0.01" style="flex:1">
+                <button id="updatePriceBtn">Manual Update</button>
+                <button id="fetchPriceBtn" style="background:#27ae60;">🔍 Fetch Single</button>
+                <button id="batchUpdateBtn" style="background:#8e44ad;">🔄 Update All Holdings</button>
+            </div>
+            <div id="fetchStatus" style="font-size:12px; margin-top:10px; color:#666;"></div>
+            <div id="batchProgress" style="font-size:12px; margin-top:5px; color:#666;"></div>
+        </div>
+
+        <!-- Holdings Table -->
+        <div class="card">
+            <h2>📈 Current Holdings</h2>
+            <div class="table-wrapper">
+                <table id="holdingsTable">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Net Shares</th>
+                            <th>Avg Cost</th>
+                            <th>Current Price</th>
+                            <th>Current Value</th>
+                            <th>P/L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdingsBody">
+                        <tr>
+                            <td colspan="6">No holdings yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Symbol Mapping Manager -->
+        <div class="card">
+            <h2>🔧 Symbol Mapping Manager</h2>
+            <p style="font-size:12px; color:#666; margin-bottom:10px;">
+                Map your portfolio symbols to Yahoo Finance symbols. Leave empty to use default (.NS for NSE)
+            </p>
+            <div class="form-row">
+                <input type="text" id="mapOriginalSymbol" placeholder="Your Symbol (e.g., TATAPOWER)" style="flex:1">
+                <input type="text" id="mapFetchSymbol" placeholder="Yahoo Symbol (e.g., TATAPOWER.NS)" style="flex:1">
+                <button id="addMappingBtn" style="background:#27ae60;">➕ Add/Update Mapping</button>
+            </div>
+            <div class="table-wrapper" style="margin-top:15px;">
+                <table id="mappingsTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Your Symbol</th>
+                            <th>Yahoo Fetch Symbol</th>
+                            <th class="actions-cell">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mappingsBody">
+                        <tr>
+                            <td colspan="3">No mappings configured. Using defaults.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:10px;">
+                <button id="clearMappingsBtn" class="small" style="background:#95a5a6;">Clear All Mappings</button>
+                <span style="font-size:12px; margin-left:10px;">💡 Tip: Use .NS for NSE, .BO for BSE stocks</span>
+            </div>
+        </div>
+        <!-- Transactions History -->
+        <div class="card">
+            <h2>📜 Transaction History</h2>
+            <div class="transaction-controls">
+                <div class="filter-group">
+                    <label>Filter by symbol:</label>
+                    <input type="text" id="filterSymbol" placeholder="Symbol..." style="width: 120px;">
+                    <label>Type:</label>
+                    <select id="filterType">
+                        <option value="all">All</option>
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                    <button id="clearFiltersBtn">Clear Filters</button>
+                </div>
+                <div class="transaction-stats">
+                    <span>📊 Total Buys: <strong id="totalBuysCount">0</strong></span>
+                    <span>💰 Total Sell Revenue: <strong id="totalSellsAmount">$0</strong></span>
+                    <span>💵 Net Cash Flow: <strong id="netCashFlowAmount">$0</strong></span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Shares</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th class="actions-cell">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsBody">
+                        <tr>
+                            <td colspan="7">No transactions yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Portfolio Summary -->
+        <div class="card">
+            <h2>💼 Portfolio Summary</h2>
+            <div class="summary-stats">
+                <div><strong>Total Value:</strong> <span id="totalValue">$0.00</span></div>
+                <div><strong>Total Invested:</strong> <span id="totalInvested">$0.00</span></div>
+                <div><strong>Total P/L:</strong> <span id="totalPL">$0.00</span></div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="card">
+            <h2>📈 Quick Stats</h2>
+            <div class="quick-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Best Performer</div>
+                    <div class="stat-value" id="bestPerformer">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Worst Performer</div>
+                    <div class="stat-value" id="worstPerformer">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Number of Holdings</div>
+                    <div class="stat-value" id="holdingCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Avg Return per Stock</div>
+                    <div class="stat-value" id="avgReturn">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="card">
+            <h2>📊 Portfolio Analytics</h2>
+            <div class="chart-tabs">
+                <button class="chart-tab active" data-chart="allocation">Allocation</button>
+                <button class="chart-tab" data-chart="growth">Growth</button>
+                <button class="chart-tab" data-chart="holdings">Top Holdings</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="portfolioChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Export/Import Section -->
+        <div class="card">
+            <h2>💾 Backup & Restore</h2>
+            <div class="form-row">
+                <button id="exportBtn">📥 Export Data (JSON)</button>
+                <label for="importFile" class="import-label">📂 Import Data</label>
+                <button id="mergeImportBtn" style="background:#f39c12;">📂 Merge Import (keep existing)</button>
+                <input type="file" id="importFile" accept=".json" style="display:none">
+                <button id="clearAllBtn" class="danger">🗑️ Clear All Data</button>
+            </div>
+            <div id="backupStatus" class="backup-status"></div>
+        </div>
+    </div>
+
+    <!-- Support / Donation Section -->
+    <div class="card support-card">
+        <h2>☕ Support the Developer</h2>
+        <div class="support-content">
+            <div class="support-text">
+                <p>If you find this portfolio manager useful, consider supporting its development.</p>
+                <p>Your support helps add new features and maintain the application.</p>
+                <div class="donation-methods">
+                    <button id="showUPIBtn" class="donation-btn">🇮🇳 UPI (India)</button>
+                    <button id="showPayPalBtn" class="donation-btn">🌍 PayPal</button>
+                    <button id="showCardBtn" class="donation-btn">💳 Credit/Debit Card</button>
+                </div>
+                <div class="donation-note">
+                    <small>⬇️ Scan QR code or click to donate ⬇️</small>
+                </div>
+            </div>
+            <div class="qr-container" id="qrContainer">
+                <div class="qr-placeholder">
+                    <p>Select a donation method above</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal (hidden by default) -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📖 User Guide</h2>
+                <span class="modal-close" onclick="closeHelpModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="helpContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>📊 Stock Portfolio Manager</h3>
+                <p>Track your investments, monitor performance, and make informed decisions.</p>
+                <div class="footer-version">Version 2.0 | © 2026</div>
+            </div>
+
+            <div class="footer-section">
+                <h3>🔗 Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="scrollToSection('addTransaction')">➕ Add Transaction</a></li>
+                    <li><a href="#" onclick="scrollToSection('updatePrices')">💰 Update Prices</a></li>
+                    <li><a href="#" onclick="scrollToSection('holdings')">📈 View Holdings</a></li>
+                    <li><a href="#" onclick="scrollToSection('transactions')">📜 Transaction History</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>❓ Help & Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showHelp()">📖 User Guide</a></li>
+                    <li><a href="#" onclick="showSymbolGuide()">🔍 Symbol Guide</a></li>
+                    <li><a href="#" onclick="showAbout()">ℹ️ About</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>⚡ Quick Tips</h3>
+                <ul class="footer-tips">
+                    <li>💡 Use .NS for NSE stocks (e.g., TATAPOWER.NS)</li>
+                    <li>💡 Add symbol mappings for custom tickers</li>
+                    <li>💡 Export data regularly for backup</li>
+                    <li>💡 Charts update with new transactions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-status">
+                <span id="footerStatus">✅ System ready</span>
+                <span id="lastUpdateTime"></span>
+            </div>
+            <div class="footer-credits">
+                Made with ❤️ for Indian Investors | Data from Yahoo Finance
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
